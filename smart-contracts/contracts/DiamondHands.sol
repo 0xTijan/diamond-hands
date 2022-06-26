@@ -1,63 +1,79 @@
 //SPDX-License-Identifier: Unlicense
 pragma solidity ^0.8.0;
 
-import "hardhat/console.sol";
+//import "hardhat/console.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
 
+contract DiamondHands is Ownable {
 
-contract DiamondHands {
+  enum Time { SECONDS, MINUTES, HOURS, DAYS, CUSTOM }
 
-  mapping(address => uint256) balances;
-  mapping(address => bool) started;
-  mapping(address => uint256) timeLocked;
-  mapping(address => bool) everDaimondHanded;
-
-  uint256 public currentDiamondHanders;
+  mapping(address => mapping(uint256 => uint256)) balances;
+  mapping(address => mapping(uint256 => bool)) active;
+  mapping(address => mapping(uint256 => uint256)) timeLocked;
+  mapping(address => mapping(uint256 => bool)) everDaimondHanded;
+  
+  Time[] vaults;
 
   error PaperHandLocated();
-  error PaperHandAlert();
+  error HodlAreYouAPaperHand();
+  error AlreadyActive();
+  error DoInitialDepositFirst();
 
-  event DiamondHanding(address daimondHands, uint256 time, uint256 amount);
-  event DiamondHandLeft(address daimondHands, uint256 amount);
-  event Added(address daimondHands, uint256 amount);
+  event DiamondHanding(address daimondHands, uint256 time, uint256 amount, uint256 vault);
+  event DiamondHandLeft(address daimondHands, uint256 amount, uint256 vault);
+  event Added(address daimondHands, uint256 amount, uint256 vault);
 
-  function deposit(uint256 _numOfDays) external payable {
-    require(_numOfDays > 1, "paper hadn detected");
-    require(!started[msg.sender], "already started");
+  constructor(Time[] memory _vaults) {
+    vaults = _vaults;
+  }
 
-    uint256 lockFor = block.timestamp + (_numOfDays * 1 seconds);
-    balances[msg.sender] += msg.value;
-    started[msg.sender] = true;
-    timeLocked[msg.sender] = lockFor;
+  function editVaults() external onlyOwner {
+
+  }
+
+  function depositToVault(uint256 _time, uint256 _vaultId) external payable {
+    if(_time > 0) revert PaperHandLocated();
+    if(!active[msg.sender][_vaultId]) revert AlreadyActive();
+
+    uint256 lockFor = block.timestamp + (_time * 1 seconds);
+    balances[msg.sender][_vaultId] += msg.value;
+    active[msg.sender][_vaultId] = true;
+    timeLocked[msg.sender][_vaultId] = lockFor;
     
-    if(!everDaimondHanded[msg.sender]) {
-      everDaimondHanded[msg.sender] = true;
-      currentDiamondHanders += 1;
+    if(!everDaimondHanded[msg.sender][_vaultId]) {
+      everDaimondHanded[msg.sender][_vaultId] = true;
     }
 
-    emit DiamondHanding(msg.sender, lockFor, msg.value);
+    emit DiamondHanding(msg.sender, lockFor, msg.value, _vaultId);
   }
 
-  function addFunds() external payable {
-    balances[msg.sender] += msg.value;
-    emit Added(msg.sender, msg.value);
+  function depositToVault() external {}
+
+  function addFundsTo(uint256 _vaultId) external payable {
+    if(active[msg.sender][_vaultId]) revert DoInitialDepositFirst();
+    balances[msg.sender][_vaultId] += msg.value;
+    emit Added(msg.sender, msg.value, _vaultId);
   }
 
-  function withdraw() external {
-    require(block.timestamp >= timeLocked[msg.sender], "paper hadn alert");
+  function withdrawFromVault(uint256 _vaultId, uint256 _amount) external {
+    if(!(block.timestamp >= timeLocked[msg.sender][_vaultId])) revert HodlAreYouAPaperHand();
 
-    uint256 toTransfer = balances[msg.sender];
-    balances[msg.sender] = 0;
-    started[msg.sender] = false;
-    timeLocked[msg.sender] = 0;
-    payable(msg.sender).transfer(toTransfer);
+    if(balances[msg.sender][_vaultId] == _amount) {
+      active[msg.sender][_vaultId] = false;
+    }
 
-    emit DiamondHandLeft(msg.sender, toTransfer);
+    balances[msg.sender][_vaultId] -= _amount;
+    timeLocked[msg.sender][_vaultId] = 0;
+    payable(msg.sender).transfer(_amount);
+
+    emit DiamondHandLeft(msg.sender, _amount, _vaultId);
   }
 
-  function getStats(address _for) external view returns(uint256, uint256) {
+  function getStats(address _for, uint256 _vaultId) external view returns(uint256, uint256) {
     return (
-      balances[_for],
-      timeLocked[_for]
+      balances[_for][_vaultId],
+      timeLocked[_for][_vaultId]
     );
   }
 
