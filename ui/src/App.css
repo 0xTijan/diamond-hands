@@ -1,0 +1,25 @@
+:root {
+  --dark-bg: #101320;
+  --light-bg: white;
+  --grey-bg: #333643;
+  --text-white: white;
+  --text-dark: #0f111b;
+  --text-secondary: #15c0f0;
+}
+
+.heading {
+  font-size: 4.5rem;
+  font-weight: 800;
+} 
+
+.text {
+  font-size: 2.5rem;
+  font-weight: 300;
+}
+
+.bg {
+  background-color: var(--dark-bg);
+  min-height: 100vh;
+  color: var(--text-white);
+}
+
