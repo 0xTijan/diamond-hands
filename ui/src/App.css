@@ -1,5 +1,5 @@
 :root {
-  --dark-bg: #101320;
+  --dark-bg: #282c34;
   --light-bg: white;
   --grey-bg: #333643;
   --text-white: white;
@@ -18,8 +18,9 @@
 }
 
 .bg {
-  background-color: var(--dark-bg);
+  background-color: var(--light-bg);
   min-height: 100vh;
-  color: var(--text-white);
+  color: var(--text-dark);
+  padding: 5vw;
 }
 

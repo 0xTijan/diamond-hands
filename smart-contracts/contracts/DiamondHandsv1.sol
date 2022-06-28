@@ -21,6 +21,7 @@ contract DiamondHands {
   function deposit(uint256 _time) external payable {
     require(_time > 1, "paper hadn detected");
     require(!started[msg.sender], "already started");
+    require(msg.value > 0, "at least hodl something");
 
     uint256 lockFor = block.timestamp + (_time * 1 seconds);
     balances[msg.sender] += msg.value;

@@ -3,13 +3,23 @@ import ReactDOM from 'react-dom/client';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';
+import { MoralisProvider } from 'react-moralis';
+import { NotificationProvider } from 'web3uikit';
 
 const root = ReactDOM.createRoot(
   document.getElementById('root') as HTMLElement
 );
 root.render(
   <React.StrictMode>
-    <App />
+    <MoralisProvider
+      initializeOnMount={false}
+      appId="l687argQ0wXNLkKUSxFHHi7eF06TApKl6gdZUGSC"
+      serverUrl="https://ewtv5jrj6irg.usemoralis.com:2053/server"
+    >
+      <NotificationProvider>
+        <App />
+      </NotificationProvider>
+    </MoralisProvider>
   </React.StrictMode>
 );
 
