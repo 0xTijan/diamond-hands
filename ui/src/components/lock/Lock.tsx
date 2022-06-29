@@ -46,8 +46,8 @@ const Lock = () => {
 
   const checkChainAndWeb3 = async() => {
     try{
-      if(chainId != "0x539") {
-        await switchNetwork("0x539");
+      if(chainId != "0xa869") {
+        await switchNetwork("0xa869");
       }
       if(!isWeb3Enabled || !isWeb3EnableLoading) {
         await enableWeb3({chainId: 1337});
@@ -101,9 +101,9 @@ const Lock = () => {
           label="Amount"
           name="Amount Input"
           onChange={(e: any) => setAmountInput(e.target.value)}
-          prefixIcon="matic"
+          prefixIcon="avax"
           iconPosition="end"
-          description="Amount of MATIC to lock"
+          description="Amount of vax to lock"
           type="number"
         />
         <Input

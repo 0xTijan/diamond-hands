@@ -9,7 +9,7 @@ const Header = () => {
       <Heading as="h2" size="4xl">DIAMOD HANDS</Heading>
       <p>Lock your funds to be come part of Diamond Hands Gang and receive free NFT!</p>
 
-      <ConnectButton />
+      <ConnectButton moralisAuth />
     </div>
   )
 }

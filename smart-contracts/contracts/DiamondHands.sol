@@ -4,7 +4,7 @@ pragma solidity ^0.8.0;
 //import "hardhat/console.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract DiamondHands is Ownable {
+contract DiamondHandsv2 is Ownable {
 
   enum Time { SECONDS, MINUTES, HOURS, DAYS, CUSTOM }
 
