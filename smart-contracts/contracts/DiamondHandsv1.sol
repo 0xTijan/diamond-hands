@@ -13,15 +13,18 @@ contract DiamondHands {
 
   error PaperHandLocated();
   error PaperHandAlert();
+  error AlreadyStarted();
+  error DepositMoreThanZero();
+  error NoMoneyLeft();
 
   event DiamondHanding(address daimondHands, uint256 time, uint256 amount);
   event DiamondHandLeft(address daimondHands, uint256 amount);
   event Added(address daimondHands, uint256 amount);
 
   function deposit(uint256 _time) external payable {
-    require(_time > 1, "paper hadn detected");
-    require(!started[msg.sender], "already started");
-    require(msg.value > 0, "at least hodl something");
+    if(_time == 0) revert PaperHandLocated();
+    if(started[msg.sender]) revert AlreadyStarted();
+    if(msg.value == 0) revert DepositMoreThanZero();
 
     uint256 lockFor = block.timestamp + (_time * 1 seconds);
     balances[msg.sender] += msg.value;
@@ -36,17 +39,14 @@ contract DiamondHands {
     emit DiamondHanding(msg.sender, lockFor, msg.value);
   }
 
-  function depositErc(address _token, uint256 _amount, uint256 _time) external {
-
-  }
-
   function addFunds() external payable {
     balances[msg.sender] += msg.value;
     emit Added(msg.sender, msg.value);
   }
 
   function withdraw() external {
-    require(block.timestamp >= timeLocked[msg.sender], "paper hadn alert");
+    if(block.timestamp < timeLocked[msg.sender]) revert PaperHandAlert();
+    if(balances[msg.sender] == 0) revert NoMoneyLeft();
 
     uint256 toTransfer = balances[msg.sender];
     balances[msg.sender] = 0;
