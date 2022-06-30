@@ -2,15 +2,20 @@ import { Heading } from "@chakra-ui/react";
 import React from "react";
 import { ConnectButton } from "web3uikit";
 
+import "./Header.css";
+
 const Header = () => {
   return(
-    <div className="header">
-      <Heading as="h4" size='4xl'>💎✋</Heading>
-      <Heading as="h2" size="4xl">DIAMOD HANDS</Heading>
-      <p>Lock your funds to be come part of Diamond Hands Gang and receive free NFT!</p>
-
-      <ConnectButton moralisAuth />
-    </div>
+    <>
+      <div className="header">
+        <span className="a">💎✋</span><br />
+        <span className="b">DIAMOD HANDS</span>
+        <p className="p">Lock your funds to hodl easily through crypto pumps and dumps!</p>
+      </div>
+      <div className="connect-btn">
+        <ConnectButton moralisAuth />
+      </div>
+    </>
   )
 }
 

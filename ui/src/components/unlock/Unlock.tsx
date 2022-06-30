@@ -10,10 +10,15 @@ type Position = {
   lockedTill: string
 }
 
-const Unlock = () => {
+interface UnlockProps {
+  getPosition: Function;
+  position: Position | undefined;
+  isLoadingStats: boolean;
+}
+
+const Unlock: React.FC<UnlockProps> = ({ getPosition, position, isLoadingStats }) => {
 
   const [txHash, setTxHash] = useState<string>("");
-  const [position, setPosition] = useState<Position>();
   const [amount, setAmount] = useState<number>();
   const handleAmountInput = (e: any) => setAmount(e.target.value);
 
@@ -22,14 +27,6 @@ const Unlock = () => {
 
   const dispatch = useNotification();
   const { error, data, runContractFunction, isFetching, isLoading } = useWeb3Contract({
-    abi: abi,
-    contractAddress: address,
-    functionName: "getStats",
-    params: {
-      _for: ""
-    },
-  });
-  const GetStats = useWeb3Contract({
     abi: abi,
     contractAddress: address,
     functionName: "getStats",
@@ -88,26 +85,6 @@ const Unlock = () => {
     }
   }
 
-  const getPosition = async() => {
-    try{
-      console.log(account)
-      await checkChainAndWeb3();
-      let options = {
-        abi: abi,
-        contractAddress: address,
-        functionName: "getStats",
-        params: {
-          _for: account
-        },
-      }
-      await GetStats.runContractFunction({ params: options });
-      console.log("getting")
-    }catch(err: any){
-      console.log(err)
-      notify("error", "Error - couldn't get position! 😥", err.message);
-    }
-  }
-
   const checkChainAndWeb3 = async() => {
     try{
       if(chainId != "0xa869") {
@@ -133,74 +110,68 @@ const Unlock = () => {
     if(data) notify("success", "Success! 😀", "Transaction was successful!");
   }, [data]);
 
-  useEffect(() => {
-    if(GetStats.error != null) {
-      notify("error", "Error! 😥", GetStats.error.message)
-      console.log(GetStats.error);
-    };
-  }, [GetStats.error]);
-
-  useEffect(() => {
-    if(GetStats.data){
-      console.log(GetStats.data)
-      let data: any = GetStats.data;
-      let date = new Date(data[1] * 1000);
-      setPosition({
-        balance: Moralis.Units.FromWei(data[0].toString()),
-        lockedTill: date.toString(),
-      })
-
-    }
-  }, [GetStats.data]);
-
-  useEffect(() => {
-    getPosition();
-  }, [])
-
   return(
     <div>
-      <h1>Locked Positions</h1>
-      <button onClick={getPosition}>Refresh</button>
-      {position ? (
-        <>
-          <hr/>
-          <p>Locked: {position.balance}</p>
-          <p>Time Locked: {position.lockedTill}</p>
-          <p>Lock More:</p>
-          <Input
-            label="Amount"
-            name="Amount Input"
-            onChange={handleAmountInput}
-            prefixIcon="avax"
-            iconPosition="end"
-            description="Amount of AVAX to lock"
-            type="number"
-          />
-          <Button
-            id="lock-more-button"
-            onClick={lockMore}
-            text="Add More"
-            theme="primary"
-            type="button"
-            size="large"
-            icon="plus"
-          />
-          <Button
-            id="withdraw-button"
-            onClick={withdraw}
-            text="Withdraw"
-            theme="primary"
-            type="button"
-            size="large"
-            icon="minus"
-          />
-        </>
+      <h1 style={{ marginTop: "6vh" }}>Your Locked Position:</h1>
+      {!account ? (
+        <p>Connect your wallet above!</p>
       ):(
-        GetStats.isLoading ? (
-          <p>Loading . . .</p>
+        <>
+        <Button
+          id="refresh-button"
+          onClick={() => getPosition()}
+          text="Refresh"
+          theme="secondary"
+          type="button"
+          size="large"
+          icon="reload"
+        />
+        
+        {position ? (
+          <div className="position">
+            <p><b>Locked:</b> {position.balance}</p>
+            <p><b>Locked Till:</b> {position.lockedTill}</p>
+            <p><b>Lock More:</b></p>
+            <div className="add-more">
+              <Input
+                label="Amount"
+                name="Amount Input"
+                onChange={handleAmountInput}
+                prefixIcon="avax"
+                iconPosition="end"
+                description="Amount of AVAX to lock"
+                type="number"
+                width="83%"
+                style={{ marginRight: "2%" }}
+              />
+              <Button
+                id="lock-more-button"
+                onClick={lockMore}
+                text="Add More"
+                theme="primary"
+                type="button"
+                size="large"
+                icon="plus"
+              />
+            </div>
+            <Button
+              id="withdraw-button"
+              onClick={withdraw}
+              text="Unlock"
+              theme="primary"
+              type="button"
+              size="large"
+              icon="bin"
+            />
+          </div>
         ):(
-          <p>You do not have anything locked. Lock it above!</p>
-        )
+          isLoadingStats ? (
+            <p>Loading . . .</p>
+          ):(
+            <p>You do not have anything locked. Lock it above!</p>
+          )
+        )}
+        </>
       )}
     </div>
   )

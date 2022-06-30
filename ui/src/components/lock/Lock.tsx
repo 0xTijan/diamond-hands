@@ -8,8 +8,11 @@ import { useNotification } from "web3uikit";
 
 import "./Lock.css";
 
+interface LockProps {
+  getPosition: Function;
+}
 
-const Lock = () => {
+const Lock: React.FC<LockProps> = ({ getPosition }) => {
 
   const [amountInput, setAmountInput] = useState<number>();
   const [timeInput, setTimeInput] = useState<number>();
@@ -90,8 +93,11 @@ const Lock = () => {
   }, [error]);
 
   useEffect(() => {
-    if(data) notify("success", "Success! 😀", "You are officialy part Diamond Hands gang!");
-  }, [data]);
+    if(data && !isFetching && !isLoading && txHash) {
+      notify("success", "Success! 😀", "You are officialy part Diamond Hands gang!");
+      getPosition();
+    }
+  }, [data,isFetching,isLoading]);
 
 
   return(
@@ -143,7 +149,7 @@ const Lock = () => {
       <div className="lock-btn">
         <Button
           id="test-button"
-          onClick={() => lock()}
+          onClick={lock}
           text="Lock"
           theme="primary"
           type="button"
